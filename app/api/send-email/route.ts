@@ -10,6 +10,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Server configuration error: Missing credentials' }, { status: 500 });
     }
 
+    // API Key Validation
+    const apiKey = request.headers.get('x-api-key');
+    if (!process.env.API_KEY || apiKey !== process.env.API_KEY) {
+      return NextResponse.json({ error: 'Unauthorized: Invalid or missing API Key' }, { status: 401 });
+    }
+
     if (!to || !subject || !html) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
