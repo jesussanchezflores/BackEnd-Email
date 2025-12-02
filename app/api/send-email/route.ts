@@ -5,8 +5,13 @@ export async function POST(request: Request) {
   try {
     const { to, subject, html, attachments } = await request.json();
 
+    if (!process.env.ZOHO_USER || !process.env.ZOHO_PASSWORD) {
+      console.error('Missing environment variables: ZOHO_USER or ZOHO_PASSWORD');
+      return NextResponse.json({ error: 'Server configuration error: Missing credentials' }, { status: 500 });
+    }
+
     if (!to || !subject || !html) {
-        return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const transporter = nodemailer.createTransport({
@@ -24,14 +29,15 @@ export async function POST(request: Request) {
       to,
       subject,
       html,
-      attachments, 
+      attachments,
     };
 
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Message sent: %s', info.messageId);
 
-    return NextResponse.json({ message: 'Email sent successfully' }, { status: 200 });
-  } catch (error) {
+    return NextResponse.json({ message: 'Email sent successfully', messageId: info.messageId }, { status: 200 });
+  } catch (error: any) {
     console.error('Error sending email:', error);
-    return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to send email', details: error.message }, { status: 500 });
   }
 }
