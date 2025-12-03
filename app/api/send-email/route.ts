@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-api-key',
+    },
+  });
+}
+
 export async function POST(request: Request) {
   try {
     const { to, subject, html, attachments } = await request.json();
